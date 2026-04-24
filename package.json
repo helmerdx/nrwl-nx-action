@@ -10,7 +10,7 @@
     "lint:fix": "eslint --fix src",
     "prepackage": "npm run build",
     "package": "ncc build -m",
-    "prepare": "husky install",
+    "prepare": "husky",
     "test": "vitest run --passWithNoTests"
   },
   "engines": {
@@ -30,26 +30,14 @@
   "bugs": {
     "url": "https://github.com/MansaGroup/nrwl-nx-action/issues"
   },
-  "commitlint": {
-    "extends": [
-      "@commitlint/config-conventional"
-    ],
-    "rules": {
-      "header-max-length": [
-        2,
-        "always",
-        85
-      ]
-    }
-  },
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint --fix",
     "*.{md,yml,html,css,scss,json}": "prettier --write"
   },
   "homepage": "https://github.com/MansaGroup/nrwl-nx-action#readme",
   "devDependencies": {
-    "@commitlint/cli": "17.4.4",
-    "@commitlint/config-conventional": "17.4.4",
+    "@commitlint/cli": "20.5.0",
+    "@commitlint/config-conventional": "20.5.0",
     "@octokit/webhooks": "10.7.0",
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
@@ -66,8 +54,8 @@
     "eslint-plugin-prettier": "5.5.5",
     "eslint-plugin-sonarjs": "0.25.1",
     "eslint-plugin-unused-imports": "4.4.1",
-    "husky": "8.0.3",
-    "lint-staged": "13.2.0",
+    "husky": "9.1.7",
+    "lint-staged": "16.4.0",
     "prettier": "3.8.3",
     "typescript": "5.9.3",
     "vitest": "4.1.5"
