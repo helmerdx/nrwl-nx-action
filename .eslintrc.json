@@ -16,6 +16,14 @@
       "parserOptions": {
         "project": "./tsconfig.json"
       },
+      "settings": {
+        "import/resolver": {
+          "typescript": {
+            "alwaysTryTypes": true,
+            "project": "./tsconfig.json"
+          }
+        }
+      },
       "plugins": [
         "@typescript-eslint",
         "sonarjs",
@@ -46,8 +54,8 @@
             "ignoreRestSiblings": true
           }
         ],
-        "unused-imports/no-unused-imports-ts": ["error"],
-        "unused-imports/no-unused-vars-ts": [
+        "unused-imports/no-unused-imports": ["error"],
+        "unused-imports/no-unused-vars": [
           "warn",
           {
             "vars": "all",
@@ -60,17 +68,6 @@
         "jsdoc/require-param-type": "off",
         "jsdoc/require-returns-type": "off",
         "jsdoc/require-jsdoc": "off"
-      }
-    },
-    {
-      "files": ["*.*spec.ts"],
-      "plugins": ["jest"],
-      "env": {
-        "jest/globals": true
-      },
-      "rules": {
-        "@typescript-eslint/unbound-method": "off",
-        "sonarjs/no-duplicate-string": "warn"
       }
     },
     {
