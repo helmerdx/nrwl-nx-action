@@ -23,9 +23,10 @@
   },
   "eslint.format.enable": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true
+    "source.fixAll.eslint": "explicit"
   },
   "editor.formatOnSave": false, // to avoid formatting twice (we already have codeActionsOnSave)
   "editor.formatOnType": false, // just to be safe
-  "editor.formatOnPaste": false
+  "editor.formatOnPaste": false,
+  "js/ts.tsdk.path": "node_modules/typescript/lib"
 }

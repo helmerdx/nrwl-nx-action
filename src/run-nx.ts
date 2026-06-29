@@ -3,7 +3,7 @@ import * as exec from '@actions/exec';
 import * as github from '@actions/github';
 import type { PullRequest, PushEvent } from '@octokit/webhooks-types';
 
-import type { Inputs } from './inputs';
+import type { Inputs } from './inputs.js';
 
 async function retrieveGitBoundaries(): Promise<[base: string, head: string]> {
   if (github.context.eventName === 'pull_request') {

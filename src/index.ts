@@ -1,7 +1,7 @@
 import * as core from '@actions/core';
 
-import { parseInputs } from './inputs';
-import { runNx } from './run-nx';
+import { parseInputs } from './inputs.js';
+import { runNx } from './run-nx.js';
 
 async function main(): Promise<void> {
   const inputs = parseInputs();
