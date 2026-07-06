@@ -37,8 +37,8 @@
   },
   "homepage": "https://github.com/MansaGroup/nrwl-nx-action#readme",
   "devDependencies": {
-    "@commitlint/cli": "20.5.0",
-    "@commitlint/config-conventional": "20.5.0",
+    "@commitlint/cli": "21.2.0",
+    "@commitlint/config-conventional": "21.2.0",
     "@octokit/webhooks": "10.9.2",
     "@octokit/webhooks-types": "7.6.1",
     "@tsconfig/node24": "24.0.4",
@@ -57,10 +57,10 @@
     "eslint-plugin-sonarjs": "0.25.1",
     "eslint-plugin-unused-imports": "4.4.1",
     "husky": "9.1.7",
-    "lint-staged": "16.4.0",
-    "prettier": "3.8.3",
+    "lint-staged": "17.0.8",
+    "prettier": "3.9.4",
     "typescript": "5.9.3",
-    "vitest": "4.1.5"
+    "vitest": "4.1.10"
   },
   "dependencies": {
     "@actions/core": "3.0.1",
