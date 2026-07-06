@@ -2,7 +2,7 @@
 
 # Nrwl Nx Action
 
-![License](https://img.shields.io/github/license/MansaGroup/nrwl-nx-action?style=flat-square) ![GitHub Issues](https://img.shields.io/github/issues/mansagroup/nrwl-nx-action?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/MansaGroup/nrwl-nx-action?style=flat-square)
+![License](https://img.shields.io/github/license/helmerdx/nrwl-nx-action?style=flat-square) ![GitHub Issues](https://img.shields.io/github/issues/helmerdx/nrwl-nx-action?style=flat-square) ![GitHub Stars](https://img.shields.io/github/stars/helmerdx/nrwl-nx-action?style=flat-square)
 
 The action wraps the usage of the [Nrwl Nx](https://nx.dev/) monorepo development toolkit.
 
@@ -35,7 +35,7 @@ This behavior can be modified using the different inputs (see below).
   with:
     fetch-depth: 0
 
-- uses: mansagroup/nrwl-nx-action@v4
+- uses: helmerdx/nrwl-nx-action@v4
   with:
     targets: lint,build,deploy
 ```
@@ -68,7 +68,8 @@ This GitHub action can take several inputs to configure its behaviors:
 
 ### `projects`
 
-When defined, will skip the `all` and `affected` inputs.
+When defined, will skip the `all` and `affected` inputs. This is useful when
+the workflow already knows exactly which projects should run.
 
 ### `affected`
 
@@ -77,6 +78,8 @@ of the workflow:
 
 - Inside a **pull request** context, the action will use the base and head Git
   references
+- Inside a **push** context, the action will use the before and after Git
+  references from the push payload
 - Otherwise, will compute the difference between the `HEAD` and the last
   commit
 
@@ -91,7 +94,7 @@ This will run the `build` target on all the affected projects.
 
 ```yaml
 ---
-- uses: mansagroup/nrwl-nx-action@v4
+- uses: helmerdx/nrwl-nx-action@v4
   with:
     targets: build
     affected: 'true' # Defaults to true, therefore optional
@@ -106,7 +109,7 @@ projects of the workspace.
 
 ```yaml
 ---
-- uses: mansagroup/nrwl-nx-action@v4
+- uses: helmerdx/nrwl-nx-action@v4
   with:
     targets: lint,test,build
     all: 'true'
@@ -121,7 +124,7 @@ only.
 
 ```yaml
 ---
-- uses: mansagroup/nrwl-nx-action@v4
+- uses: helmerdx/nrwl-nx-action@v4
   with:
     targets: build
     projects: frontend,backend
@@ -136,7 +139,7 @@ sequentially.
 
 ```yaml
 ---
-- uses: mansagroup/nrwl-nx-action@v4
+- uses: helmerdx/nrwl-nx-action@v4
   with:
     targets: lint
     all: 'true'
@@ -152,7 +155,7 @@ Nx workspace located in another folder than the repository root.
 
 ```yaml
 ---
-- uses: mansagroup/nrwl-nx-action@v4
+- uses: helmerdx/nrwl-nx-action@v4
   with:
     targets: build
     workingDirectory: my-nx-subfolder
@@ -168,11 +171,95 @@ Nx Cloud enabled (by adding the `--scan` command option and both
 
 ```yaml
 ---
-- uses: mansagroup/nrwl-nx-action@v4
+- uses: helmerdx/nrwl-nx-action@v4
   with:
     targets: build
     nxCloud: 'true'
 ```
+
+### Run affected targets after a push
+
+This will run the `test` target on projects affected by a push. Use
+`fetch-depth: 0` so Nx can compare the pushed commits.
+
+> workflow.yml
+
+```yaml
+---
+on: push
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - uses: helmerdx/nrwl-nx-action@v4
+        with:
+          targets: test
+```
+
+### Run affected targets outside pull request and push events
+
+For other workflow events, the action compares `HEAD~1` and `HEAD`.
+
+> workflow.yml
+
+```yaml
+---
+on: workflow_dispatch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 2
+
+      - uses: helmerdx/nrwl-nx-action@v4
+        with:
+          targets: build
+```
+
+## Troubleshooting
+
+### Nx cannot find the base or head commit
+
+Use `actions/checkout` with enough Git history for the comparison you want Nx
+to make. The most reliable option is:
+
+```yaml
+- uses: actions/checkout@v6
+  with:
+    fetch-depth: 0
+```
+
+For non-pull-request and non-push workflows, `fetch-depth: 2` is enough when the
+action only needs to compare `HEAD~1` and `HEAD`.
+
+### The action runs projects that are not affected
+
+Check whether the `projects` input is set. When `projects` is defined, the action
+uses that explicit project list and ignores `all` and `affected`.
+
+### The action cannot find the Nx workspace
+
+Set `workingDirectory` when the Nx workspace is not at the repository root:
+
+```yaml
+- uses: helmerdx/nrwl-nx-action@v4
+  with:
+    targets: build
+    workingDirectory: my-nx-subfolder
+```
+
+### A pull request from a fork fails during affected detection
+
+Make sure the checkout step fetches the base branch history. Forked pull
+requests often expose only a shallow checkout unless `fetch-depth` is configured.
 
 ## License
 
@@ -187,7 +274,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- markdownlint-disable -->
 <table>
   <tr>
-    <td align="center"><a href="https://github.com/tc-developer01"><img src="https://avatars.githubusercontent.com/u/89852602?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tc-developer01</b></sub></a><br /><a href="https://github.com/MansaGroup/nrwl-nx-action/commits?author=tc-developer01" title="Code">💻</a></td>
+    <td align="center"><a href="https://github.com/tc-developer01"><img src="https://avatars.githubusercontent.com/u/89852602?v=4?s=100" width="100px;" alt=""/><br /><sub><b>tc-developer01</b></sub></a><br /><a href="https://github.com/helmerdx/nrwl-nx-action/commits?author=tc-developer01" title="Code">💻</a></td>
   </tr>
 </table>
 
