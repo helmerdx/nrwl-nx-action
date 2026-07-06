@@ -4,7 +4,7 @@
   "description": "![Banner](.github/assets/banner-thin.png)",
   "type": "module",
   "main": "lib/index.js",
-  "packageManager": "pnpm@10.33.2",
+  "packageManager": "pnpm@10.34.4",
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
     "lint": "eslint src",
@@ -39,11 +39,11 @@
   "devDependencies": {
     "@commitlint/cli": "20.5.0",
     "@commitlint/config-conventional": "20.5.0",
-    "@octokit/webhooks": "10.7.0",
+    "@octokit/webhooks": "10.9.2",
     "@octokit/webhooks-types": "7.6.1",
     "@tsconfig/node24": "24.0.4",
     "@tsconfig/strictest": "2.0.8",
-    "@types/node": "24.12.2",
+    "@types/node": "24.13.2",
     "@typescript-eslint/eslint-plugin": "8.59.0",
     "@typescript-eslint/parser": "8.59.0",
     "@vercel/ncc": "0.38.4",
