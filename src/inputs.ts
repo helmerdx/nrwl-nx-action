@@ -11,21 +11,26 @@ export type Inputs = {
   readonly workingDirectory: string;
 };
 
+function parseListInput(name: string, options?: core.InputOptions): string[] {
+  return core
+    .getInput(name, options)
+    .split(',')
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+}
+
+function parseParallelInput(): number {
+  const parallel = parseInt(core.getInput('parallel'), 10);
+  return Number.isNaN(parallel) ? 3 : parallel;
+}
+
 export function parseInputs(): Inputs {
   return {
-    targets: core
-      .getInput('targets', { required: true })
-      .split(',')
-      .filter((target) => target.length > 0),
-    projects: core
-      .getInput('projects', { required: false })
-      .split(',')
-      .filter((project) => project.length > 0),
+    targets: parseListInput('targets', { required: true }),
+    projects: parseListInput('projects', { required: false }),
     all: core.getInput('all') === 'true',
     affected: core.getInput('affected') === 'true',
-    parallel: Number.isNaN(parseInt(core.getInput('parallel')))
-      ? 3
-      : parseInt(core.getInput('parallel')),
+    parallel: parseParallelInput(),
     args: core.getInput('args'),
     nxCloud: core.getInput('nxCloud') === 'true',
     workingDirectory: core.getInput('workingDirectory'),
