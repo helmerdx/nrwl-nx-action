@@ -4,7 +4,7 @@
   "description": "![Banner](.github/assets/banner-thin.png)",
   "type": "module",
   "main": "lib/index.js",
-  "packageManager": "pnpm@10.34.4",
+  "packageManager": "pnpm@11.10.0",
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
     "lint": "eslint src",
