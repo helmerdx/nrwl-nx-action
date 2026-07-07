@@ -1,14 +1,19 @@
 import * as core from '@actions/core';
 import * as exec from '@actions/exec';
 import * as github from '@actions/github';
-import type { PullRequest, PushEvent } from '@octokit/webhooks-types';
+import type { components } from '@octokit/openapi-webhooks-types';
 
 import type { Inputs } from './inputs.js';
 
+type PullRequestEvent =
+  | components['schemas']['webhook-pull-request-opened']
+  | components['schemas']['webhook-pull-request-synchronize'];
+type PushEvent = components['schemas']['webhook-push'];
+
 async function retrieveGitBoundaries(): Promise<[base: string, head: string]> {
   if (github.context.eventName === 'pull_request') {
-    const prPayload = github.context.payload.pull_request as PullRequest;
-    return [prPayload.base.sha, prPayload.head.sha];
+    const prPayload = github.context.payload as PullRequestEvent;
+    return [prPayload.pull_request.base.sha, prPayload.pull_request.head.sha];
   } else if (github.context.eventName === 'push') {
     const pushPayload = github.context.payload as PushEvent;
     return [pushPayload.before, pushPayload.after];
@@ -103,7 +108,7 @@ export async function runNx(inputs: Inputs): Promise<void> {
     process.env['NX_RUN_GROUP'] = github.context.runId.toString();
 
     if (github.context.eventName === 'pull_request') {
-      const prPayload = github.context.payload.pull_request as PullRequest;
+      const prPayload = github.context.payload as PullRequestEvent;
       process.env['NX_BRANCH'] = prPayload.number.toString();
     }
   }
