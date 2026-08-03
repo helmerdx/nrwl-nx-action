@@ -6,6 +6,12 @@
 
 The action wraps the usage of the [Nrwl Nx](https://nx.dev/) monorepo development toolkit.
 
+## Compatibility
+
+This action supports Nx releases from the preceding two years. The current minimum
+version is Nx 20.0.0. The minimum supported version is reviewed and updated for each
+action release.
+
 Nx manages multiple **projects** linked each other with a dependecy graph. One of its key
 features is to permit to run one or more **tasks** only on the projects affected by our
 changes (by checking the difference between two Git references).
@@ -40,8 +46,9 @@ This behavior can be modified using the different inputs (see below).
     targets: lint,build,deploy
 ```
 
-This simple step will run three targets: `lint`, `build` and `deploy`, sequentially
-only on the affected projects. Nothing more. Simple. More examples below.
+This simple step will run the `lint`, `build`, and `deploy` targets on affected
+projects. The targets are submitted to Nx together, allowing its task graph to
+schedule work efficiently. More examples below.
 
 > Note:
 > By default, the checkout action will only clone the latest commit of the branch,

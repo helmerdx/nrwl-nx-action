@@ -1,6 +1,6 @@
 name: 'Nrwl Nx'
 author: 'Mansa Group'
-description: 'Wrap the Nx monorepo tool and execute tasks depending on the action context'
+description: 'Run Nx 20+ tasks for the current GitHub Actions context'
 inputs:
   targets:
     description: 'Comma-separated list of targets to execute'

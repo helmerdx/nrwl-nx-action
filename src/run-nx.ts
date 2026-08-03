@@ -43,41 +43,18 @@ async function nx(args: readonly string[]): Promise<void> {
   await exec.exec(`npx nx ${args.join(' ')}`);
 }
 
-async function runNxAll(
-  inputs: Inputs,
-  args: readonly string[],
-): Promise<void> {
-  return inputs.targets.reduce(
-    (lastPromise, target) =>
-      lastPromise.then(() =>
-        nx(['run-many', `--target=${target}`, '--all', ...args]),
-      ),
-    Promise.resolve(),
-  );
+async function runNxAll(args: readonly string[]): Promise<void> {
+  return nx(['run-many', ...args]);
 }
 
 async function runNxProjects(
   inputs: Inputs,
   args: readonly string[],
 ): Promise<void> {
-  return inputs.targets.reduce(
-    (lastPromise, target) =>
-      lastPromise.then(() =>
-        nx([
-          'run-many',
-          `--target=${target}`,
-          `--projects=${inputs.projects.join(',')}`,
-          ...args,
-        ]),
-      ),
-    Promise.resolve(),
-  );
+  return nx(['run-many', `--projects=${inputs.projects.join(',')}`, ...args]);
 }
 
-async function runNxAffected(
-  inputs: Inputs,
-  args: readonly string[],
-): Promise<void> {
+async function runNxAffected(args: readonly string[]): Promise<void> {
   const [base, head] = await core.group(
     '🏷 Retrieving Git boundaries (affected command)',
     () =>
@@ -88,19 +65,7 @@ async function runNxAffected(
       }),
   );
 
-  return inputs.targets.reduce(
-    (lastPromise, target) =>
-      lastPromise.then(() =>
-        nx([
-          'affected',
-          `--target=${target}`,
-          `--base=${base}`,
-          `--head=${head}`,
-          ...args,
-        ]),
-      ),
-    Promise.resolve(),
-  );
+  return nx(['affected', `--base=${base}`, `--head=${head}`, ...args]);
 }
 
 export async function runNx(inputs: Inputs): Promise<void> {
@@ -114,6 +79,7 @@ export async function runNx(inputs: Inputs): Promise<void> {
   }
 
   const args: readonly string[] = [
+    `--targets=${inputs.targets.join(',')}`,
     `--parallel=${inputs.parallel}`,
     inputs.args,
   ];
@@ -121,8 +87,8 @@ export async function runNx(inputs: Inputs): Promise<void> {
   if (inputs.projects.length > 0) {
     return runNxProjects(inputs, args);
   } else if (inputs.all === true || inputs.affected === false) {
-    return runNxAll(inputs, args);
+    return runNxAll(args);
   } else {
-    return runNxAffected(inputs, args);
+    return runNxAffected(args);
   }
 }
