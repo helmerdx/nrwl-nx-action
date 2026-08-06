@@ -132,15 +132,25 @@ jobs:
             const marker = '<!-- nrwl-nx-action-e2e-report -->';
             const result = '${{ needs.e2e.result }}';
             const status = result === 'success' ? '✅ Passed' : '❌ Failed';
-            const body = `${marker}
-            ## End-to-end test report
-
-            **${status}** - the packaged action was run against a real Nx workspace.
-
-            - Commit: `${context.sha}`
-            - [View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
-
-            _This comment is updated after each E2E run._`;
+            const workflowUrl =
+              context.serverUrl +
+              '/' +
+              context.repo.owner +
+              '/' +
+              context.repo.repo +
+              '/actions/runs/' +
+              context.runId;
+            const body = [
+              marker,
+              '## End-to-end test report',
+              '',
+              '**' + status + '** - the packaged action was run against a real Nx workspace.',
+              '',
+              '- Commit: `' + context.sha + '`',
+              '- [View workflow run](' + workflowUrl + ')',
+              '',
+              '_This comment is updated after each E2E run._',
+            ].join('\n');
             const comments = await github.paginate(github.rest.issues.listComments, {
               ...context.repo,
               issue_number: context.issue.number,
