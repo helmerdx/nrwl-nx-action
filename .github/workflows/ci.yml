@@ -115,3 +115,53 @@ jobs:
 
       - name: Run end-to-end tests
         run: pnpm run test:e2e
+
+  e2e-report:
+    if: >-
+      ${{ always() && github.event.pull_request.head.repo.full_name == github.repository }}
+    needs: e2e
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+
+    steps:
+      - name: Update pull request report
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const marker = '<!-- nrwl-nx-action-e2e-report -->';
+            const result = '${{ needs.e2e.result }}';
+            const status = result === 'success' ? '✅ Passed' : '❌ Failed';
+            const body = `${marker}
+            ## End-to-end test report
+
+            **${status}** - the packaged action was run against a real Nx workspace.
+
+            - Commit: `${context.sha}`
+            - [View workflow run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})
+
+            _This comment is updated after each E2E run._`;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...context.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const previousComment = comments.find(
+              (comment) =>
+                comment.user?.login === 'github-actions[bot]' &&
+                comment.body?.includes(marker),
+            );
+
+            if (previousComment) {
+              await github.rest.issues.updateComment({
+                ...context.repo,
+                comment_id: previousComment.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
