@@ -123,10 +123,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       issues: write
+      pull-requests: write
 
     steps:
       - name: Update pull request report
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const marker = '<!-- nrwl-nx-action-e2e-report -->';
