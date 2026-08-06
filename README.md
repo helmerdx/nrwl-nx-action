@@ -71,7 +71,8 @@ This GitHub action can take several inputs to configure its behaviors:
 | nxCloud          | Boolean              | `false` | `true`             | Enable support of Nx Cloud                                                         |
 | workingDirectory | String               | ø       | `myNxFolder`       | Path to the Nx workspace, needed if not the repository root                        |
 
-**Note:** `all` and `affected` are mutually exclusive.
+**Note:** `all` and `affected` are mutually exclusive. When setting `all: 'true'`,
+also set `affected: 'false'`.
 
 ### `projects`
 
@@ -120,6 +121,7 @@ projects of the workspace.
   with:
     targets: lint,test,build
     all: 'true'
+    affected: 'false'
 ```
 
 ### Run one target on some projects
@@ -150,6 +152,7 @@ sequentially.
   with:
     targets: lint
     all: 'true'
+    affected: 'false'
     parallel: 1
 ```
 
