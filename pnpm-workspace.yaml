@@ -1,4 +1,5 @@
 allowBuilds:
+  nx: false
   unrs-resolver: false
 minimumReleaseAgeExclude:
   - '@vitest/expect@4.1.10'
