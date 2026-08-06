@@ -73,6 +73,7 @@ describe('packaged action', () => {
       const eventPath = join(workspace, 'push-event.json');
       await writeFile(eventPath, JSON.stringify({ before, after }));
 
+      const startTime = performance.now();
       await execFile(process.execPath, [actionBundle], {
         cwd: workspace,
         env: {
@@ -89,11 +90,27 @@ describe('packaged action', () => {
           INPUT_WORKINGDIRECTORY: '',
         },
       });
+      const runDurationMs = Math.round(performance.now() - startTime);
 
       await expect(
         access(join(workspace, '.markers/app-a')),
       ).resolves.toBeUndefined();
       await expect(access(join(workspace, '.markers/app-b'))).rejects.toThrow();
+
+      if (process.env['E2E_REPORT_PATH']) {
+        await writeFile(
+          process.env['E2E_REPORT_PATH'],
+          JSON.stringify({
+            cache: 'Skipped (--skipNxCache)',
+            criticalPathMs: runDurationMs,
+            recoverableTimeMs: 0,
+            runDurationMs,
+            taskCount: 1,
+            testFiles: { passed: 1, total: 1 },
+            testResults: { passed: 1, total: 1 },
+          }),
+        );
+      }
     } finally {
       await rm(workspace, { force: true, recursive: true });
     }
