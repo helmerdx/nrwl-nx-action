@@ -3,8 +3,12 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { parseInputs } from './inputs.js';
 
 const mockGetInput = vi.hoisted(() => vi.fn<(name: string) => string>());
+const mockGetBooleanInput = vi.hoisted(() =>
+  vi.fn<(name: string) => boolean>(),
+);
 
 vi.mock('@actions/core', () => ({
+  getBooleanInput: mockGetBooleanInput,
   getInput: mockGetInput,
 }));
 
@@ -30,11 +34,21 @@ function mockInputs(inputs: Partial<typeof defaultInputs>): void {
   mockGetInput.mockImplementation((name: string) =>
     Object.hasOwn(values, name) ? values[name as InputName] : '',
   );
+  mockGetBooleanInput.mockImplementation((name: string) => {
+    const value = Object.hasOwn(values, name) ? values[name as InputName] : '';
+
+    if (value !== 'true' && value !== 'false') {
+      throw new TypeError(`Input "${name}" must be either 'true' or 'false'.`);
+    }
+
+    return value === 'true';
+  });
 }
 
 describe('parseInputs', () => {
   beforeEach(() => {
     mockGetInput.mockReset();
+    mockGetBooleanInput.mockReset();
     mockInputs({});
   });
 
@@ -54,26 +68,51 @@ describe('parseInputs', () => {
     expect(parseInputs().projects).toEqual(['frontend', 'backend', 'api']);
   });
 
-  it('falls back to the default parallel value when invalid', () => {
-    mockInputs({
-      parallel: 'not-a-number',
-    });
+  it.each(['0', '-1', '1.5', '3targets'])(
+    'rejects invalid parallel value %s',
+    (parallel) => {
+      mockInputs({ parallel });
 
-    expect(parseInputs().parallel).toBe(3);
-  });
+      expect(parseInputs).toThrow(
+        'Input "parallel" must be a positive integer.',
+      );
+    },
+  );
 
-  it('parses boolean inputs only when the value is true', () => {
+  it('parses valid boolean inputs', () => {
     mockInputs({
-      all: 'true',
+      all: 'false',
       affected: 'false',
-      nxCloud: 'TRUE',
+      nxCloud: 'true',
     });
 
     expect(parseInputs()).toMatchObject({
-      all: true,
+      all: false,
       affected: false,
-      nxCloud: false,
+      nxCloud: true,
     });
+  });
+
+  it('rejects invalid boolean inputs', () => {
+    mockInputs({ nxCloud: 'TRUE' });
+
+    expect(parseInputs).toThrow('Input "nxCloud" must be either');
+  });
+
+  it('rejects an empty targets list', () => {
+    mockInputs({ targets: ' , ' });
+
+    expect(parseInputs).toThrow(
+      'Input "targets" must contain at least one target.',
+    );
+  });
+
+  it('rejects all and affected when both are true', () => {
+    mockInputs({ all: 'true', affected: 'true' });
+
+    expect(parseInputs).toThrow(
+      'Inputs "all" and "affected" cannot both be true.',
+    );
   });
 
   it('keeps the remaining string inputs unchanged', () => {

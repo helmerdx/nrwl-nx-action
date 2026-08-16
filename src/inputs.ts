@@ -20,19 +20,42 @@ function parseListInput(name: string, options?: core.InputOptions): string[] {
 }
 
 function parseParallelInput(): number {
-  const parallel = parseInt(core.getInput('parallel'), 10);
-  return Number.isNaN(parallel) ? 3 : parallel;
+  const value = core.getInput('parallel');
+
+  if (!/^[1-9]\d*$/.test(value)) {
+    throw new Error('Input "parallel" must be a positive integer.');
+  }
+
+  const parallel = Number(value);
+
+  if (!Number.isSafeInteger(parallel)) {
+    throw new Error('Input "parallel" must be a safe positive integer.');
+  }
+
+  return parallel;
 }
 
 export function parseInputs(): Inputs {
+  const targets = parseListInput('targets', { required: true });
+  const all = core.getBooleanInput('all');
+  const affected = core.getBooleanInput('affected');
+
+  if (targets.length === 0) {
+    throw new Error('Input "targets" must contain at least one target.');
+  }
+
+  if (all && affected) {
+    throw new Error('Inputs "all" and "affected" cannot both be true.');
+  }
+
   return {
-    targets: parseListInput('targets', { required: true }),
+    targets,
     projects: parseListInput('projects', { required: false }),
-    all: core.getInput('all') === 'true',
-    affected: core.getInput('affected') === 'true',
+    all,
+    affected,
     parallel: parseParallelInput(),
     args: core.getInput('args'),
-    nxCloud: core.getInput('nxCloud') === 'true',
+    nxCloud: core.getBooleanInput('nxCloud'),
     workingDirectory: core.getInput('workingDirectory'),
   };
 }

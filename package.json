@@ -7,12 +7,13 @@
   "packageManager": "pnpm@11.10.0",
   "scripts": {
     "build": "tsc --build ./tsconfig.build.json",
-    "lint": "eslint src",
-    "lint:fix": "eslint --fix src",
+    "lint": "eslint src test",
+    "lint:fix": "eslint --fix src test",
     "prepackage": "tsc --build ./tsconfig.build.json",
     "package": "ncc build -m",
     "prepare": "husky",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests",
+    "test:e2e": "pnpm package && vitest run test/action.e2e.test.ts"
   },
   "engines": {
     "node": ">=24"
@@ -58,6 +59,7 @@
     "eslint-plugin-unused-imports": "4.4.1",
     "husky": "9.1.7",
     "lint-staged": "17.0.8",
+    "nx": "23.1.1",
     "prettier": "3.9.4",
     "typescript": "5.9.3",
     "vitest": "4.1.10"

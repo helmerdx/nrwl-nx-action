@@ -1,0 +1,12 @@
+{
+  "name": "app-a",
+  "root": "apps/app-a",
+  "targets": {
+    "marker": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "node tools/write-marker.mjs app-a"
+      }
+    }
+  }
+}
