@@ -44,10 +44,6 @@ export function parseInputs(): Inputs {
     throw new Error('Input "targets" must contain at least one target.');
   }
 
-  if (all && affected) {
-    throw new Error('Inputs "all" and "affected" cannot both be true.');
-  }
-
   return {
     targets,
     projects: parseListInput('projects', { required: false }),

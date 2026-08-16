@@ -107,12 +107,10 @@ describe('parseInputs', () => {
     );
   });
 
-  it('rejects all and affected when both are true', () => {
+  it('allows all and affected when both are true so all can take precedence', () => {
     mockInputs({ all: 'true', affected: 'true' });
 
-    expect(parseInputs).toThrow(
-      'Inputs "all" and "affected" cannot both be true.',
-    );
+    expect(parseInputs()).toMatchObject({ all: true, affected: true });
   });
 
   it('keeps the remaining string inputs unchanged', () => {
