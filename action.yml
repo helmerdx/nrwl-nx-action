@@ -8,11 +8,11 @@ inputs:
   projects:
     description: 'Comma-separated list of projects to use'
     required: false
-  all: # Mutually exclusive with `affected`
-    description: 'Run the targets on all projects. Set affected to false when true.'
+  all:
+    description: 'Run the targets on all projects. Takes precedence over affected.'
     required: false
     default: 'false'
-  affected: # Mutually exclusive with `all`
+  affected:
     description: 'Use the Nx affected subcommand to only process affected projects'
     required: false
     default: 'true'
