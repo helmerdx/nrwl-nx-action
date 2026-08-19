@@ -10,33 +10,116 @@ type PullRequestEvent =
   | components['schemas']['webhook-pull-request-synchronize'];
 type PushEvent = components['schemas']['webhook-push'];
 
-async function retrieveGitBoundaries(): Promise<[base: string, head: string]> {
+type GitBoundarySource =
+  | 'NX_BASE environment variable'
+  | 'NX_HEAD environment variable'
+  | 'pull request event'
+  | 'push event'
+  | 'HEAD~1 fallback'
+  | 'HEAD fallback';
+
+type GitBoundary = {
+  value: string;
+  source: GitBoundarySource;
+};
+
+function retrieveEnvironmentBoundary(
+  name: 'NX_BASE' | 'NX_HEAD',
+): GitBoundary | undefined {
+  const value = process.env[name];
+  if (value === undefined || value === '') {
+    return undefined;
+  }
+
+  return {
+    value,
+    source:
+      name === 'NX_BASE'
+        ? 'NX_BASE environment variable'
+        : 'NX_HEAD environment variable',
+  };
+}
+
+async function retrieveGitBoundaryFromGit(
+  ref: 'HEAD~1' | 'HEAD',
+): Promise<GitBoundary> {
+  let boundary = '';
+  await exec.exec('git', ['rev-parse', ref], {
+    listeners: {
+      stdout: (data: Buffer) => (boundary += data.toString()),
+    },
+  });
+
+  return {
+    value: boundary.replace(/(\r\n|\n|\r)/gm, ''),
+    source: ref === 'HEAD~1' ? 'HEAD~1 fallback' : 'HEAD fallback',
+  };
+}
+
+async function retrieveEventGitBoundaries(
+  needsBase: boolean,
+  needsHead: boolean,
+): Promise<[base: GitBoundary | undefined, head: GitBoundary | undefined]> {
   if (github.context.eventName === 'pull_request') {
     const prPayload = github.context.payload as PullRequestEvent;
-    return [prPayload.pull_request.base.sha, prPayload.pull_request.head.sha];
-  } else if (github.context.eventName === 'push') {
-    const pushPayload = github.context.payload as PushEvent;
-    return [pushPayload.before, pushPayload.after];
-  } else {
-    let base = '';
-    await exec.exec('git', ['rev-parse', 'HEAD~1'], {
-      listeners: {
-        stdout: (data: Buffer) => (base += data.toString()),
-      },
-    });
-
-    let head = '';
-    await exec.exec('git', ['rev-parse', 'HEAD'], {
-      listeners: {
-        stdout: (data: Buffer) => (head += data.toString()),
-      },
-    });
-
     return [
-      base.replace(/(\r\n|\n|\r)/gm, ''),
-      head.replace(/(\r\n|\n|\r)/gm, ''),
+      needsBase
+        ? {
+            value: prPayload.pull_request.base.sha,
+            source: 'pull request event',
+          }
+        : undefined,
+      needsHead
+        ? {
+            value: prPayload.pull_request.head.sha,
+            source: 'pull request event',
+          }
+        : undefined,
     ];
   }
+
+  if (github.context.eventName === 'push') {
+    const pushPayload = github.context.payload as PushEvent;
+    return [
+      needsBase
+        ? { value: pushPayload.before, source: 'push event' }
+        : undefined,
+      needsHead
+        ? { value: pushPayload.after, source: 'push event' }
+        : undefined,
+    ];
+  }
+
+  return [
+    needsBase ? await retrieveGitBoundaryFromGit('HEAD~1') : undefined,
+    needsHead ? await retrieveGitBoundaryFromGit('HEAD') : undefined,
+  ];
+}
+
+async function retrieveGitBoundaries(): Promise<[base: string, head: string]> {
+  const envBase = retrieveEnvironmentBoundary('NX_BASE');
+  const envHead = retrieveEnvironmentBoundary('NX_HEAD');
+
+  if (envBase !== undefined && envHead !== undefined) {
+    core.info(
+      `Git boundary sources: base=${envBase.source}, head=${envHead.source}`,
+    );
+    return [envBase.value, envHead.value];
+  }
+
+  const [eventBase, eventHead] = await retrieveEventGitBoundaries(
+    envBase === undefined,
+    envHead === undefined,
+  );
+  const base = envBase ?? eventBase;
+  const head = envHead ?? eventHead;
+
+  if (base === undefined || head === undefined) {
+    throw new Error('Unable to retrieve Git boundaries');
+  }
+
+  core.info(`Git boundary sources: base=${base.source}, head=${head.source}`);
+  return [base.value, head.value];
 }
 
 async function nx(args: readonly string[]): Promise<void> {
