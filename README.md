@@ -37,7 +37,7 @@ This behavior can be modified using the different inputs (see below).
 ```yaml
 ---
 - name: Checkout
-  uses: actions/checkout@v6
+  uses: actions/checkout@v7
   with:
     fetch-depth: 0
 
@@ -90,6 +90,11 @@ of the workflow:
   references from the push payload
 - Otherwise, will compute the difference between the `HEAD` and the last
   commit
+
+`NX_BASE` and `NX_HEAD` take precedence over event-based detection, independently
+for each boundary. This lets workflows provide a custom range while the action
+continues to pass explicit `--base` and `--head` arguments to Nx. If only one
+variable is set, the other boundary is determined from the event as usual.
 
 ## Examples
 
@@ -202,13 +207,52 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - uses: helmerdx/nrwl-nx-action@v4
         with:
           targets: test
+```
+
+### Use the last successful run as the affected base
+
+Use [`nrwl/nx-set-shas`](https://github.com/nrwl/nx-set-shas) before this action
+to set `NX_BASE` and `NX_HEAD`. Those values take precedence over the push payload.
+
+> workflow.yml
+
+```yaml
+---
+- uses: actions/checkout@v7
+  with:
+    fetch-depth: 0
+
+- uses: nrwl/nx-set-shas@v4
+
+- uses: helmerdx/nrwl-nx-action@v4
+  with:
+    targets: test
+```
+
+### Provide an affected range manually
+
+For example, a release workflow can compare against a previous release tag by
+writing the boundaries to `GITHUB_ENV`.
+
+> workflow.yml
+
+```yaml
+---
+- name: Set Nx boundaries
+  run: |
+    echo "NX_BASE=$(git describe --tags --abbrev=0 HEAD^)" >> "$GITHUB_ENV"
+    echo "NX_HEAD=$GITHUB_SHA" >> "$GITHUB_ENV"
+
+- uses: helmerdx/nrwl-nx-action@v4
+  with:
+    targets: build
 ```
 
 ### Run affected targets outside pull request and push events
@@ -225,7 +269,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
@@ -242,7 +286,7 @@ Use `actions/checkout` with enough Git history for the comparison you want Nx
 to make. The most reliable option is:
 
 ```yaml
-- uses: actions/checkout@v6
+- uses: actions/checkout@v7
   with:
     fetch-depth: 0
 ```
