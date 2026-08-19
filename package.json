@@ -1,6 +1,6 @@
 {
   "name": "nrwl-nx-action",
-  "version": "4.1.0",
+  "version": "4.3.0",
   "description": "![Banner](.github/assets/banner-thin.png)",
   "type": "module",
   "main": "lib/index.js",
