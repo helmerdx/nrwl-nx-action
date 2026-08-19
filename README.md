@@ -37,7 +37,7 @@ This behavior can be modified using the different inputs (see below).
 ```yaml
 ---
 - name: Checkout
-  uses: actions/checkout@v6
+  uses: actions/checkout@v7
   with:
     fetch-depth: 0
 
@@ -207,7 +207,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -225,7 +225,7 @@ to set `NX_BASE` and `NX_HEAD`. Those values take precedence over the push paylo
 
 ```yaml
 ---
-- uses: actions/checkout@v6
+- uses: actions/checkout@v7
   with:
     fetch-depth: 0
 
@@ -269,7 +269,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 2
 
@@ -286,7 +286,7 @@ Use `actions/checkout` with enough Git history for the comparison you want Nx
 to make. The most reliable option is:
 
 ```yaml
-- uses: actions/checkout@v6
+- uses: actions/checkout@v7
   with:
     fetch-depth: 0
 ```
